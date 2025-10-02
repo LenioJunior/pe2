@@ -9,6 +9,9 @@ Implemente uma funçao recursiva em C que inverta uma string
 A ideia  ́e inverter o primeiro e o ́ultimo caractere e chamar a funçao
 para o trecho restante da string, até que o índice inicial seja maior ou
 igual ao final.
+
+• Exemplo de entrada: “computador”
+• Saída esperada: “rodatupmoc”
 */
 
 char * inverterString(char * palavra, int ind1, int ind2){
