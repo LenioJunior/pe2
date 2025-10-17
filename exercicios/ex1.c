@@ -1,5 +1,5 @@
 /*
-Exercício 1: Cadastro de Aluno (Struct B ́asica)
+Exercício 1: Cadastro de Aluno (Struct Básica)
 
 Crie uma struct Aluno com os campos: nome, matrícula e m ́edia. Leia os dados
 de 3 alunos e exiba o nome do aluno com a maior m ́edia.
@@ -8,14 +8,11 @@ Conceitos: struct b ́asica.
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include"aluno.h"
 
-enum Curso { COMPUTACAO, ELETRICA, MECATRONICA };
-
-typedef struct pessoa{
-  char * nome;
-  char * matricula;
-  float media;
-} Pessoa;
+void limpaBuffer(){
+  while(getchar() != '\n');
+}
 
 int tamanhoString(char * string){
   int tamanho = 0;
@@ -37,45 +34,46 @@ char * lerString(){
   return novaString;
 }
 
-void limpaBuffer(){
-  while(getchar() != '\n');
-}
-
-void lerDadosPessoa(Pessoa * pessoa){
-  printf("-------- Lendo dados da pessoa ---------\n");
+void lerDadosAluno(Aluno * aluno){
+  printf("-------- Lendo dados da aluno ---------\n");
   printf("Informe o nome:\n");
-  pessoa->nome = lerString();
+  aluno->nome = lerString();
   printf("Informe a matricula:\n");
-  pessoa->matricula = lerString();
+  aluno->matricula = lerString();
   printf("Informe a media:\n");
-  scanf("%f", &pessoa->media);
+  scanf("%f", &aluno->media);
   limpaBuffer();
 }
 
-void exibeDadosPessoa(Pessoa * pessoa){
-  printf("-------- Exibindo os dados da pessoa ---------\n");
+void exibeDadosAluno(Aluno * aluno){
+  printf("-------- Exibindo os dados da aluno ---------\n");
   printf("Nome: %sMatricula: %sMedia: %.2f\n",
-    pessoa->nome, pessoa->matricula, pessoa->media);
+    aluno->nome, aluno->matricula, aluno->media);
 }
 
-int main(){
+int exercicio1(){
   int quantidade;
-  printf("Informe a quantidade de pessoas a serem lidas\n");
+  printf("Informe a quantidade de alunos a serem lidas\n");
   scanf("%d", &quantidade);
 
   limpaBuffer();
   
-  Pessoa * pessoa = malloc(sizeof(Pessoa) * quantidade);
-  if(pessoa == NULL)
+  Aluno * aluno = criar(quantidade);
+  if(aluno == NULL)
     return 1;
 
   for (int i = 0; i < quantidade; i++)
   {
-    lerDadosPessoa(&pessoa[i]);
+    lerDadosAluno(&aluno[i]);
   }  
 
   for (int i = 0; i < quantidade; i++)
   {
-    exibeDadosPessoa(&pessoa[i]);
-  }  
+    exibeDadosAluno(&aluno[i]);
+  }
+  return 0;
 }
+
+// int main(){
+//   return exercicio1();
+// }
