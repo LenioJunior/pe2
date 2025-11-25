@@ -1,18 +1,20 @@
+#include<stdio.h>
+
 typedef enum cor {
   AZUL = 10,
   AMARELO = 20,
   PRETO = 30
 } Cor;
 
-char * printaCor(enum cor cor){
+char * obtemCor(enum cor cor){
   switch (cor)
   {
   case 10:
-    return "Azul";
+    return "Azul\n";
   case 20:
-    return "Amarelo";  
+    return "Amarelo\n";  
   case 30:
-    return "Preto";  
+    return "Preto\n";  
   default:
     break;
   }
@@ -20,8 +22,14 @@ char * printaCor(enum cor cor){
 
 int main(){
   Cor cor = AZUL;
-  printf("Cor: %s\n\n\n", printaCor(cor));
+  printf("Cor: %s\n\n\n", obtemCor(cor));
 
   cor = PRETO;
-  printf("Cor: %s\n\n\n", printaCor(cor));
+  printf("Cor: %s\n\n\n", obtemCor(cor));
+
+  int numeroCor;
+  printf("Informe uma cor (10, 20 ou 30): ");
+  scanf("%d", &numeroCor);
+  Cor corLida = numeroCor;
+  printf("Cor Lida: %s\n", obtemCor(corLida));
 }
