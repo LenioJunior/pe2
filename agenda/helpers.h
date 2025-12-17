@@ -5,6 +5,6 @@
 
 int leOpcao();
 void apresentaMenu();
-void executaOpcao(int opcao, Contato * contatos, int quantidade);
+void executaOpcao(int opcao);
 
 #endif

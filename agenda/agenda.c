@@ -4,12 +4,41 @@
 
 Contato * contatos = NULL;
 
+#define fileName "agenda.txt"
+
 void limpaBuffer(){
   while(getchar() != '\n');
 }
 
+int carregarDoArquivo(){
+  FILE * file = abrirAgenda();
+
+  if(file == NULL){
+    printf("Não foi possível abrir a agenda!\n");
+    return 1;
+  }
+
+  Contato * contato = novoContato();
+
+  do {
+    int count = fread(contato, sizeof(Contato), 1, file);
+    if (count != 1){
+      printf("Erro ao efetuar a leitura do contato do arquivo!\n");
+      return -1;
+    }
+    if(contatos == NULL){
+      contatos = contato;
+    } else {
+      contatos->proximo
+    }
+  } while (1);
+
+  fecharAgenda(file);
+}
+
 Contato * novoContato(){
   Contato * novo = malloc(sizeof(Contato));
+  novo->preenchido = 0;
   novo->anterior = NULL;
   novo->proximo = NULL;
   return novo;
@@ -31,9 +60,10 @@ void lerDadosContato(Contato * contato){
   scanf("%d", &contato->endereco.numero);
   printf("Informe o Cep: ");
   fgets(contato->endereco.cep, sizeof(contato->endereco.cep), stdin);
+  contato->preenchido = 1;
 }
 
-FILE * abrirAgenda(char fileName[]){
+FILE * abrirAgenda(){
   return fopen(fileName, "w");
 }
 
@@ -42,13 +72,19 @@ int fecharAgenda(FILE * file){
 }
 
 void exibirContato(Contato * contato){
-  printf("Nome: %s\nApelido: %s\nTelefone: %s\n", contato->nome, contato->apelido, contato->telefone);
-  printf("Endereco: %s %s %d, Cep: %s", contato->endereco.logradouro, contato->endereco.endereco, contato->endereco.numero, contato->endereco.cep);
+  printf("Contato: %p\n", contato);
+  printf("preenchido: %d\n", contato->preenchido);
+  if(contato->preenchido){
+    printf("Nome: %s\nApelido: %s\nTelefone: %s\n", contato->nome, contato->apelido, contato->telefone);
+    printf("Endereco: %s %s %d, Cep: %s", contato->endereco.logradouro, contato->endereco.endereco, contato->endereco.numero, contato->endereco.cep);
+  }
 }
 
 void exibirContatos(){
-  if(contatos == NULL)
-    printf("Não há contatos a serem exibidos.");
+  if(contatos == NULL){
+    printf("Não há contatos a serem exibidos.\n");
+    return;
+  }
 
   do {
     exibirContato(contatos);
@@ -56,22 +92,42 @@ void exibirContatos(){
   } while(contatos != NULL);
 }
 
+void addNosContatos(Contato * contato){
+
+}
+
 int incluirContato(){
+  Contato * novo;
   if(contatos == NULL){
     contatos = novoContato();
-    lerDadosContato(contatos);
+    novo = contatos;
   } else {
-    Contato * novo = novoContato();
-    lerDadosContato(novo);
+    novo = novoContato();
+  }
+  
+  lerDadosContato(novo);
+  printf("Contato Lido!\n");
+  while (contatos->proximo != NULL) {
+    contatos++;
+  } 
 
-    do {
-      contatos++;
-    } while (contatos->proximo != NULL);
-
+  if(novo != contatos){
+    printf("Contato adicionado apos o contato: %s\n", contatos->nome);
     novo->proximo = contatos->proximo;
     novo->anterior = contatos;
     contatos->proximo = novo;
   }
+
+  FILE * file = abrirAgenda();
+  printf("Agenda aberta!\n");
+  int count = fwrite(novo, sizeof(Contato), 1, file);
+  if(count != 1){
+    printf("Ocorreu um erro ao gravar o contato.\n");
+    return 1;
+  }
+  printf("Contato gravado com sucesso!.\n");
+  fecharAgenda(file);
+  
   
   return 0;
 }

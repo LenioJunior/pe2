@@ -5,12 +5,11 @@
 
 
 int main(){
-  Contato * contatos = malloc(sizeof(Contato));
   int opcao;
   do {
     apresentaMenu();
     opcao = leOpcao();
-    executaOpcao(opcao, contatos, 1);
+    executaOpcao(opcao);
   } while (opcao != -1);
   printf("Finalizando...");
   return 0;

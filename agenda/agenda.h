@@ -18,15 +18,18 @@ typedef struct contato {
   Endereco endereco;
   struct contato * anterior;
   struct contato * proximo;
+  int preenchido;
 } Contato;
 
-FILE * abrirAgenda(char fileName[]);
+FILE * abrirAgenda();
 int fecharAgenda();
+int carregarDoArquivo();
 void exibirContato(Contato * contato);
 void exibirContatos();
 int incluirContato();
 int editarContato();
 int removerContato();
 void buscarContato();
+Contato * novoContato();
 
 #endif
