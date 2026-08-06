@@ -1,0 +1,24 @@
+======== RELATÓRIO ========
+
+--- CLIENTES ---
+1 - sofia loss (893274838) Email: sofia@
+2 - richard kato (8974309875) Email: richard@
+
+--- ESTOQUE ---
+1 - calça (Tam m) R$ 40.00
+6 - blusa (Tam p) R$ 10.00
+7 - short (Tam g) R$ 30.00
+
+--- VENDAS ---
+
+Venda 1
+Cliente: sofia loss
+Total: R$ 40.00
+  - calça (Tam m) R$ 40.00
+
+Venda 2
+Cliente: richard kato
+Total: R$ 80.00
+  - calça (Tam m) R$ 40.00
+  - blusa (Tam p) R$ 10.00
+  - short (Tam g) R$ 30.00

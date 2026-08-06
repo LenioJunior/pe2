@@ -1,0 +1,8 @@
+------- Pessoas ------
+ID | Nome                 | idade
+0  | fulano               | 50  
+------- Livros ------
+ID | Titulo               | autor                | quantidade           | restrição          | disponibilidade     
+0  | calculo2             | laudo                | 2                    | 0                  | 0                   
+------- livros ------
+ID | nome do cliente      | total de livros      | Data       | fim        | devolvido0  | fulano               | 1                    | 12/12/2025 | 26/12/2026 | 0

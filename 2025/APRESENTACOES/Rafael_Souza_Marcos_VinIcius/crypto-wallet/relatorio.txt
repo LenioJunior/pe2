@@ -1,0 +1,11 @@
+==== RELATÓRIO DE CARTEIRAS DE CRIPTOMOEDAS ====
+
+Usuário ID: 1 - Nome: rafael - E-mail: rafael@
+Saldo USD: 3389,84
+Transações: 3
+Histórico:
+25/11/2025 - COMPRA: 2,00 SOL por 254,56 USD (Solana)
+01/12/2025 - VENDA: -1,00 ETH por 2748,94 USD (Ethereum)
+01/12/2025 - VENDA: -0,75 SOL por 95,46 USD (Solana)
+-----------------------------------------
+
