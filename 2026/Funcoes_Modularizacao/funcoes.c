@@ -3,6 +3,7 @@
 
 int soma(){
     printf("Eu sou a soma\n");
+    subtracao();
 }
 
 int subtracao(int num){
