@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 typedef struct
 {
@@ -17,7 +18,7 @@ void lerDados(Pessoa *pessoa)
     printf("Informe o nome\n");
     scanf(" %49[^\n]", pessoa->nome);
     printf("Informe a idade\n");
-    scanf("%d", &pessoa->idade);
+    lerValorNumerico(&pessoa->idade);
 }
 
 int isListaVazia(int quantidade)
@@ -25,55 +26,81 @@ int isListaVazia(int quantidade)
     return quantidade == 0;
 }
 
-Pessoa * leArquivo(int * quantidade)
+Pessoa *lerArquivo(int *quantidade)
 {
     char nomeArquivo[] = "agenda.txt";
-    FILE *arquivo = fopen(nomeArquivo, "a");
+    FILE *arquivo = fopen(nomeArquivo, "r");
 
     if (!arquivo)
     {
-        printf("Não foi possível ler o arquivo '%s'.\n", nomeArquivo);
+        char error[200];
+        snprintf(error, sizeof(error), "Não foi possível ler o arquivo '%s'.\n", nomeArquivo);
+        perror(error);
         exit(1);
     }
 
     int numRegistros = 100;
-    int cont = 0;
     char linha[256];
-    Pessoa * agenda = malloc(numRegistros * sizeof(Pessoa));
 
-    while (cont < numRegistros && fgets(linha, sizeof(linha), arquivo) != NULL)
+    Pessoa *agenda = malloc(numRegistros * sizeof(Pessoa));
+    Pessoa *toLoop = agenda;
+
+    while (*quantidade < numRegistros && fgets(linha, sizeof(linha), arquivo) != NULL)
     {
-        int lidos = sscanf(linha, "%d,%d,%49[^\n]", agenda[cont].id, agenda[cont].idade, agenda[cont].nome);
+        int lidos = sscanf(linha, "%d,%d,%49[^\n]", &toLoop->id, &toLoop->idade, toLoop->nome);
         if (lidos != 3)
         {
-            printf("Erro ao ler a linha '%d' do arquivo!\n", cont + 1);
+            printf("Erro ao ler a linha '%d' do arquivo!\n", (*quantidade) + 1);
         }
+        toLoop++;
+        (*quantidade)++;
     }
-
-    *quantidade = cont;
 
     fclose(arquivo);
 
-    return realloc(agenda, cont);
+    if (*quantidade > 0)
+    {
+        return realloc(agenda, (*quantidade) * sizeof(Pessoa));
+    }
+    else
+    {
+        return NULL;
+    }
 }
 
-int gravaArquivo(Pessoa *agenda, int quantidade)
+void gravaArquivo(Pessoa *agenda, int quantidade)
 {
-    // char nomeArquivo[] = "agenda.txt";
-    // FILE *arquivo = fopen(nomeArquivo, "+a");
-    // if (!arquivo)
-    // {
-    //     printf("Não foi possível gravar no arquivo '%s'.\n", nomeArquivo);
-    //     exit(1);
-    // }
+    char nomeArquivo[] = "agenda.txt";
+    FILE *arquivo = fopen(nomeArquivo, "w");
+    if (!arquivo)
+    {
+        char error[200];
+        snprintf(error, sizeof(error), "Não foi possível gravar no arquivo '%s'.\n", nomeArquivo);
+        perror(error);
+        exit(1);
+    }
 
-    // for (int i = 0; i < quantidade; i++)
-    // {
-    //     fprintf(arquivo, "%d,%d,%49[^\n]", agenda->id, agenda->idade, agenda->nome);
-    // }
+    for (int i = 0; i < quantidade; i++)
+    {
+        fprintf(arquivo, "%d,%d,%s\n", agenda->id, agenda->idade, agenda->nome);
+        agenda++;
+    }
 
-    // fclose(arquivo);
-    return 0;
+    fclose(arquivo);
+}
+
+void lerValorNumerico(int * numero)
+{
+    int resultado = scanf("%d", numero);
+    
+    // Resultado indica quantos %d foram lidos.
+    // Se foi lido 0 em resultado, significa que usuário digitou caracteres ao invés de números.
+    if (resultado == 0)
+    {
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF)
+            ;
+    }
 }
 
 Pessoa *inserir(Pessoa *agenda, int *quantidade, int *id)
@@ -84,7 +111,7 @@ Pessoa *inserir(Pessoa *agenda, int *quantidade, int *id)
         if (resized == NULL)
         {
             printf("Erro ao realocar a agenda.");
-            exit(1);
+            return agenda;
         }
         agenda = resized;
     }
@@ -97,94 +124,72 @@ Pessoa *inserir(Pessoa *agenda, int *quantidade, int *id)
     return agenda;
 }
 
-Pessoa *buscarPorId(Pessoa *agenda, int quantidade, int id, int *posicao)
+int buscarPorId(Pessoa *agenda, int quantidade, int id)
 {
-    for (int i = 0; i < quantidade; i++)
+    for (int indice = 0; indice < quantidade; indice++)
     {
         if (agenda->id == id)
         {
-            *posicao = i;
-            return agenda;
+            return indice;
         }
         agenda++;
     }
-    return NULL;
+    return -1;
 }
 
-Pessoa *buscarPorNome(Pessoa *agenda, int quantidade, char *nome, int *posicao)
+int buscarPorNome(Pessoa *agenda, int quantidade, char *nome)
 {
-    for (int i = 0; i < quantidade; i++)
+    for (int indice = 0; indice < quantidade; indice++)
     {
         if (strcmp(agenda->nome, nome) == 0)
         {
-            *posicao = i;
-            return agenda;
+            return indice;
         }
         agenda++;
     }
-    return NULL;
+    return -1;
 }
 
-void acaoEditar()
+int acoesDeBusca(Pessoa *agenda, int quantidade)
 {
-    printf("Executei acao editar");
-}
-
-void acaoExcluir()
-{
-    printf("Executei acao excluir");
-}
-
-void editar(Pessoa *agenda, int quantidade, void (*acao)())
-{
+    int posicaoEncontrada = -1;
     if (isListaVazia(quantidade))
     {
         printf("Agenda vazia!\n");
+        return posicaoEncontrada;
     }
     else
     {
         int opcaoBusca = 0;
-        Pessoa *pessoa = NULL;
-        int posicao = -1;
         do
         {
             printf("Deseja buscar por 1-Id, 2-Nome, 3-Listar, 4-Voltar?\n");
-            scanf("%d", &opcaoBusca);
+            lerValorNumerico(&opcaoBusca);
+
             switch (opcaoBusca)
             {
             case 1:
                 printf("Informe um Id para buscar\n");
                 int id;
-                scanf("%d", &id);
-                pessoa = buscarPorId(agenda, quantidade, id, &posicao);
-                if (pessoa == NULL)
-                {
-                    printf("Pessoa com Id '%d' não encontrada!\n", id);
-                }
-                else
-                {
-                    listarPessoa(pessoa);
-                    lerDados(pessoa);
-                    printf("Pessoa Editada com Sucesso!\n");
-                }
+                lerValorNumerico(&id);
 
+                posicaoEncontrada = buscarPorId(agenda, quantidade, id);
+                if (posicaoEncontrada != -1)
+                {
+                    return posicaoEncontrada;
+                }
+                printf("Pessoa com Id '%d' não encontrada!\n", id);
                 break;
             case 2:
                 printf("Informe um Nome para buscar\n");
                 char nome[50];
                 scanf(" %49[^\n]", nome);
-                pessoa = buscarPorNome(agenda, quantidade, nome, &posicao);
-                if (pessoa == NULL)
+                posicaoEncontrada = buscarPorNome(agenda, quantidade, nome);
+                if (posicaoEncontrada != -1)
                 {
-                    printf("Pessoa com Nome '%s' não encontrada!\n", nome);
+                    return posicaoEncontrada;
                 }
-                else
-                {
-                    acao();
-                    listarPessoa(pessoa);
-                    lerDados(pessoa);
-                    printf("Pessoa Editada com Sucesso!\n");
-                }
+                printf("Pessoa com Nome '%s' não encontrada!\n", nome);
                 break;
             case 3:
                 listar(agenda, quantidade);
@@ -193,98 +198,59 @@ void editar(Pessoa *agenda, int quantidade, void (*acao)())
                 break;
             default:
                 printf("Opção Inválida!\n");
-                opcaoBusca = -1;
                 break;
             }
 
         } while (opcaoBusca != 4);
     }
+    return posicaoEncontrada;
+}
+
+void editar(Pessoa *agenda, int quantidade)
+{
+    int posicaoEncontrada = acoesDeBusca(agenda, quantidade);
+    if (posicaoEncontrada != -1)
+    {
+        Pessoa *pessoaEncontrada = agenda + posicaoEncontrada;
+        listarPessoa(pessoaEncontrada);
+        lerDados(pessoaEncontrada);
+        printf("\n--- Pessoa Editada com Sucesso! ---\n");
+    }
+}
+
+Pessoa *moverElementosAposExcluido(Pessoa *agenda, int *quantidade, int posicaoEncontrada)
+{
+    Pessoa *registrosMovidos = agenda + posicaoEncontrada;
+    for (int i = posicaoEncontrada; i < *quantidade - 1; i++)
+    {
+        *registrosMovidos = *(registrosMovidos + 1);
+        registrosMovidos++;
+        posicaoEncontrada++;
+    }
+    (*quantidade)--;
+
+    if (*quantidade > 0)
+    {
+        registrosMovidos = realloc(agenda, (*quantidade) * sizeof(Pessoa));
+    }
+
+    if (registrosMovidos == NULL)
+    {
+        printf("Erro ao realocar agenda após exclusão!\n");
+        exit(1);
+    }
+    return registrosMovidos;
 }
 
 void excluir(Pessoa *agenda, int *quantidade)
 {
-    if (isListaVazia(*quantidade))
+    int posicaoEncontrada = acoesDeBusca(agenda, *quantidade);
+    if (posicaoEncontrada != -1)
     {
-        printf("Agenda vazia!\n");
-    }
-    else
-    {
-        int opcaoBusca = 0;
-        Pessoa *pessoa = NULL;
-        int posicao = -1;
-        do
-        {
-            printf("Deseja buscar por 1-Id, 2-Nome, 3-Listar, 4-Voltar?\n");
-            scanf("%d", &opcaoBusca);
-            switch (opcaoBusca)
-            {
-            case 1:
-                printf("Informe um Id para buscar\n");
-                int id;
-                scanf("%d", &id);
-                pessoa = buscarPorId(agenda, *quantidade, id, &posicao);
-                if (pessoa == NULL)
-                {
-                    printf("Pessoa com Id '%d' não encontrada!\n", id);
-                }
-                else
-                {
-                    listarPessoa(pessoa);
-
-                    // Excluir
-                    Pessoa *busca = pessoa;
-                    for (int i = posicao; i < *quantidade - 1; i++)
-                    {
-                        *busca = *(busca + 1);
-                        busca++;
-                        posicao++;
-                    }
-                    (*quantidade)--;
-
-                    if (*quantidade > 0)
-                    {
-                        busca = realloc(agenda, (*quantidade) * sizeof(Pessoa));
-                    }
-
-                    if (busca == NULL)
-                    {
-                        printf("Erro ao realocar agenda após exclusão!\n");
-                        exit(1);
-                    }
-
-                    printf("Pessoa Excluída com Sucesso!\n");
-                }
-
-                break;
-            case 2:
-                printf("Informe um Nome para buscar\n");
-                char nome[50];
-                scanf(" %49[^\n]", nome);
-                pessoa = buscarPorNome(agenda, *quantidade, nome, &posicao);
-                if (pessoa == NULL)
-                {
-                    printf("Pessoa com Nome '%s' não encontrada!\n", nome);
-                }
-                else
-                {
-                    listarPessoa(pessoa);
-
-                    // Excluir
-
-                    printf("Pessoa Excluída com Sucesso!\n");
-                }
-                break;
-            case 3:
-                listar(agenda, *quantidade);
-                break;
-            case 4:
-                break;
-            default:
-                printf("Opção Inválida!\n");
-                break;
-            }
-
-        } while (opcaoBusca != 4);
+        Pessoa *pessoaEncontrada = agenda + posicaoEncontrada;
+        listarPessoa(pessoaEncontrada);
+        moverElementosAposExcluido(agenda, quantidade, posicaoEncontrada);
+        printf("\n--- Pessoa Excluída com Sucesso! ---\n");
     }
 }
 
@@ -307,6 +273,7 @@ void listar(Pessoa *pessoa, int quantidade)
             listarPessoa(pessoa);
             pessoa++;
         }
+        printf("\n------------------------------\n");
     }
 }
 
@@ -324,7 +291,13 @@ void menu()
     int quantidade = 0;
     int id = 1;
 
-    //agenda = leArquivo(&quantidade);
+    Pessoa *lido = lerArquivo(&quantidade);
+
+    if (lido != NULL)
+    {
+        agenda = lido;
+        id = (lido + quantidade - 1)->id + 1;
+    }
 
     do
     {
@@ -336,15 +309,7 @@ void menu()
         printf("5-Sair\n");
 
         printf("Digite a opção\n");
-        int resultado = scanf("%d", &opcao);
-        // Resultado indica quantos %d foram lidos.
-        // Se foi lido 0 em resultado, significa que usuário digitou caracteres.
-        if (resultado == 0)
-        {
-            int c;
-            while ((c = getchar()) != '\n' && c != EOF)
-                ;
-        }
+        lerValorNumerico(&opcao);
 
         switch (opcao)
         {
@@ -361,7 +326,7 @@ void menu()
             break;
         case 3:
             printf("Editar\n");
-            editar(agenda, quantidade, acaoEditar);
+            editar(agenda, quantidade);
             gravaArquivo(agenda, quantidade);
             break;
         case 4:
